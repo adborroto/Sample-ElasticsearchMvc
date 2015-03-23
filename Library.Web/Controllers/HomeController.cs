@@ -19,22 +19,7 @@ namespace Library.Web.Controllers
             
             return View();
         }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
-        }
-
-
+        
         public ActionResult Search(string query,int page= 0,int pageSize = 10)
         {
            var result = _searchService.Find(query, page, pageSize);
