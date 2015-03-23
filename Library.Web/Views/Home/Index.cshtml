@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Nest.IHit<Library.Web.Models.Book>>
+﻿@model Library.Web.ViewModels.SearchViewModel
 @{
     ViewBag.Title = "Elasticsearch";
 }
@@ -10,48 +10,87 @@
 </div>
 
 
-
-@if (Model != null)
+@if (Model == null)
 {
-    <table class="table table-condensed">
-        <thead>
-            <tr><th>Score</th><th>Title</th><th>Author</th></tr>
-        </thead>
-
-        <tbody>
-            @foreach (var result in Model)
+    return;
+}
+    <div style="margin-top: 30px;">
+        @if (Model.Suggestions.Any(x => x.Key == "did-you-mean"))
+        {
+            <span>Did you mean: </span>
+            foreach (var suggestions in Model.Suggestions["did-you-mean"])
             {
-                <tr>
-                    <td>@result.Score</td>
-                    <td>
-                        <a href="/Books/Details/@result.Id">
-                            @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "title"))
+                var count = 0;
+                foreach (var suggestion in suggestions.Options)
+                {
+                    <a href="/Home/Search?query=@suggestion.Text"><strong>@suggestion.Text </strong>&emsp;</a>
+                    count++;
+                }
+                if (count == 0)
+                {
+                    <span class="alert-danger">There is no suggestion</span>
+                }
+
+            }
+        }
+    </div>
+
+    <h3><strong>Results for:</strong> @Model.Query</h3>
+
+    @if (Model != null)
+    {
+        <table class="table table-condensed">
+            <thead>
+                <tr><th>Score</th><th>Title</th><th>Content</th><th>Author</th></tr>
+            </thead>
+
+            <tbody>
+                @foreach (var result in Model.Results)
+                {
+                    <tr>
+                        <td>@result.Score</td>
+                        <td>
+                            <a href="/Books/Details/@result.Id">
+                                @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "title"))
+                                {
+                                    var hl = result.Highlights.FirstOrDefault(x => x.Key == "title");
+                                    foreach (var h in hl.Value.Highlights)
+                                    {
+                                        WriteLiteral(h);
+                                    }
+                                }
+                                else
+                                {
+                                    WriteLiteral(result.Source.Title);
+                                }
+                            </a>
+                        </td>
+
+                        <td>
+                            @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "foreword"))
                             {
-                                var hl = result.Highlights.FirstOrDefault(x => x.Key == "title");
+                                var hl = result.Highlights.FirstOrDefault(x => x.Key == "foreword");
                                 foreach (var h in hl.Value.Highlights)
                                 {
-                                    WriteLiteral(h);
+                                    WriteLiteral(h + "...");
                                 }
                             }
-                            else
-                            {
-                                WriteLiteral(result.Source.Title);
-                            }
-                        </a>
-                    </td>
-                    <td>@result.Source.Author</td>
-                </tr>
 
-            }
-            @if (!Model.Any())
-            {
-                 <tr>
-                     <td></td>
-                     <td>Not results found :(</td>
-                </tr>
-            }
-        </tbody>
+                        </td>
 
-    </table>
-   <h4>Results <span class="label label-default">@Model.Count()</span></h4>
-}
+                        <td>@result.Source.Author</td>
+                    </tr>
+
+                }
+                @if (!Model.Results.Any())
+                {
+                    <tr>
+                        <td></td>
+                        <td>Not results found :(</td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+        <h4><span class="label label-default">@Model.Results.Count()</span> results found in @Model.Elapsed millisecond</h4>
+    }

@@ -112,6 +112,16 @@ namespace Library.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        public JsonResult Reindex()
+        {
+            foreach (var book in db.Books)
+            {
+                //Indexing book
+                Elasticsearch.Elasticsearch.Client.Index<Book>(book);
+            }
+            return Json("OK",JsonRequestBehavior.AllowGet);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
