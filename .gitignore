@@ -18,6 +18,9 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+#Local DB
+App_Data/
+
 # Roslyn cache directories
 *.ide/
 
