@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<Nest.IHit<Library.Web.Models.Book>>
 @{
-    ViewBag.Title = "Home Page";
+    ViewBag.Title = "Elasticsearch";
 }
 
 <div class="jumbotron">
@@ -23,7 +23,22 @@
             {
                 <tr>
                     <td>@result.Score</td>
-                    <td>@result.Source.Title</td>
+                    <td>
+                        <a href="/Books/Details/@result.Id">
+                            @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "title"))
+                            {
+                                var hl = result.Highlights.FirstOrDefault(x => x.Key == "title");
+                                foreach (var h in hl.Value.Highlights)
+                                {
+                                    WriteLiteral(h);
+                                }
+                            }
+                            else
+                            {
+                                WriteLiteral(result.Source.Title);
+                            }
+                        </a>
+                    </td>
                     <td>@result.Source.Author</td>
                 </tr>
 
