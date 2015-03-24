@@ -5,8 +5,19 @@
 
 <div class="jumbotron">
     <h1>Getting started with Elasticseach</h1>
-    <p class="lead">Go to Books and insert books to search after.</p>
-    <p><a href="/Books/Create" class="btn btn-primary btn-large">Go &raquo;</a></p>
+    <p class="lead">Installing and configuring your cluster</p>
+    <ol>
+        <li>
+            <a href="http://www.oracle.com/technetwork/java/
+javase/downloads/index.html">Installing Java</a>
+        </li>
+        <li>
+            <a href="http://www.elasticsearch.org/
+download/">Installing Elasticsearch</a>
+        </li>
+        <li>Running Elasticsearch</li>
+        <li><a href="/Books/Create">Insert some books</a></li>
+    </ol>
 </div>
 
 
@@ -14,83 +25,82 @@
 {
     return;
 }
-    <div style="margin-top: 30px;">
-        @if (Model.Suggestions.Any(x => x.Key == "did-you-mean"))
-        {
-            <span>Did you mean: </span>
-            foreach (var suggestions in Model.Suggestions["did-you-mean"])
-            {
-                var count = 0;
-                foreach (var suggestion in suggestions.Options)
-                {
-                    <a href="/Home/Search?query=@suggestion.Text"><strong>@suggestion.Text </strong>&emsp;</a>
-                    count++;
-                }
-                if (count == 0)
-                {
-                    <span class="alert-danger">There is no suggestion</span>
-                }
-
-            }
-        }
-    </div>
-
-    <h3><strong>Results for:</strong> @Model.Query</h3>
-
-    @if (Model != null)
+<div style="margin-top: 30px;">
+    @if (Model.Suggestions.Any(x => x.Key == "did-you-mean"))
     {
-        <table class="table table-condensed">
-            <thead>
-                <tr><th>Score</th><th>Title</th><th>Content</th><th>Author</th></tr>
-            </thead>
+        <span>Did you mean: </span>
+        foreach (var suggestions in Model.Suggestions["did-you-mean"])
+        {
+            var count = 0;
+            foreach (var suggestion in suggestions.Options)
+            {
+                <a href="/Home/Search?query=@suggestion.Text"><strong>@suggestion.Text </strong>&emsp;</a>
+                count++;
+            }
+            if (count == 0)
+            {
+                <span class="alert-danger">There is no suggestion</span>
+            }
 
-            <tbody>
-                @foreach (var result in Model.Results)
-                {
-                    <tr>
-                        <td>@result.Score</td>
-                        <td>
-                            <a href="/Books/Details/@result.Id">
-                                @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "title"))
-                                {
-                                    var hl = result.Highlights.FirstOrDefault(x => x.Key == "title");
-                                    foreach (var h in hl.Value.Highlights)
-                                    {
-                                        WriteLiteral(h);
-                                    }
-                                }
-                                else
-                                {
-                                    WriteLiteral(result.Source.Title);
-                                }
-                            </a>
-                        </td>
+        }
+    }
+</div>
 
-                        <td>
-                            @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "foreword"))
+<h3><strong>Results for:</strong> @Model.Query</h3>
+
+@if (Model != null)
+{
+    <table class="table table-condensed">
+        <thead>
+            <tr><th>Score</th><th>Title</th><th>Content</th><th>Author</th></tr>
+        </thead>
+
+        <tbody>
+            @foreach (var result in Model.Results)
+            {
+                <tr>
+                    <td>@result.Score</td>
+                    <td>
+                        <a href="/Books/Details/@result.Id">
+                            @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "title"))
                             {
-                                var hl = result.Highlights.FirstOrDefault(x => x.Key == "foreword");
+                                var hl = result.Highlights.FirstOrDefault(x => x.Key == "title");
                                 foreach (var h in hl.Value.Highlights)
                                 {
-                                    WriteLiteral(h + "...");
+                                    WriteLiteral(h);
                                 }
                             }
+                            else
+                            {
+                                WriteLiteral(result.Source.Title);
+                            }
+                        </a>
+                    </td>
 
-                        </td>
+                    <td>
+                        @if (result.Highlights != null && result.Highlights.Any(x => x.Key == "foreword"))
+                        {
+                            var hl = result.Highlights.FirstOrDefault(x => x.Key == "foreword");
+                            foreach (var h in hl.Value.Highlights)
+                            {
+                                WriteLiteral(h + "...");
+                            }
+                        }
 
-                        <td>@result.Source.Author</td>
-                    </tr>
+                    </td>
 
-                }
-                @if (!Model.Results.Any())
-                {
-                    <tr>
-                        <td></td>
-                        <td>Not results found :(</td>
-                    </tr>
-                }
-            </tbody>
+                    <td>@result.Source.Author</td>
+                </tr>
 
-        </table>
-        <h4><span class="label label-default">@Model.Results.Count()</span> results found in @Model.Elapsed millisecond</h4>
-    }
+            }
+            @if (!Model.Results.Any())
+            {
+                <tr>
+                    <td colspan="4" class="alert alert-danger" style="text-align:center;">Not results found :(</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+    <h4><span class="label label-default">@Model.Results.Count()</span> results found in @Model.Elapsed millisecond</h4>
+}
