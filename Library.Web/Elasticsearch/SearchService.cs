@@ -9,6 +9,7 @@ namespace Library.Web.Controllers
 {
     public class SearchService
     {
+        public double MinScore { get {return 0.0005; }}
         public string PreHighlightTag
         {
             get { return @"<strong>"; }
@@ -25,6 +26,7 @@ namespace Library.Web.Controllers
             var result = Elasticsearch.Elasticsearch.Client.Search<Book>(s => s
                  .From(page * pageSize)
                  .Size(pageSize)
+                 .MinScore(MinScore)
                  .Highlight(h => h
                      .PreTags(PreHighlightTag)
                      .PostTags(PostHighlightTag)
@@ -32,7 +34,7 @@ namespace Library.Web.Controllers
                          f => f.OnField(b => b.Foreword),
                          f => f.OnField(b => b.Title)
                          ))
-                 .Query(q => q.QueryString(qs => qs.Query(query))));
+                 .Query(q => q.QueryString(qs => qs.Query(query).UseDisMax())));
 
             return new Tuple<IEnumerable<IHit<Book>>, long>(result.Hits,result.ElapsedMilliseconds); 
         }
